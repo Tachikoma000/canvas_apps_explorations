@@ -1,6 +1,27 @@
-# Getting Started with Create React App
+# Canvas Notes App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A React application that allows users to create and connect notes on an interactive canvas.
+
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app) and uses [React Flow](https://reactflow.dev/) for canvas interactions.
+
+## Deploying to Vercel
+
+This project is configured for easy deployment to Vercel. Follow these steps:
+
+1. Ensure you have the Vercel CLI installed: `npm i -g vercel`
+2. Log in to Vercel: `vercel login`
+3. From the project root directory, run: `vercel`
+4. Follow the prompts to deploy your application
+
+Alternatively, you can connect your GitHub repository to Vercel for automatic deployments:
+
+1. Push your code to GitHub
+2. Visit [vercel.com](https://vercel.com) and sign in
+3. Click "New Project" and import your repository
+4. Vercel will detect React automatically and use the correct build settings
+5. Click "Deploy"
+
+The deployment is configured through the `vercel.json` file in the root directory.
 
 ## Available Scripts
 

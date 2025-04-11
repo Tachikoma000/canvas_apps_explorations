@@ -6,10 +6,18 @@ This guide explains how to deploy the Canvas Notes App to Vercel.
 
 The following files have been configured for Vercel deployment:
 
-- **vercel.json**: Main configuration file for Vercel deployment
+- **Root vercel.json**: Main configuration file at the repository root that tells Vercel where to find your project
+- **App vercel.json**: Secondary configuration inside the app directory
 - **.npmrc**: Ensures smooth package installation with modern React
 - **_redirects**: Handles client-side routing redirects
 - **package.json**: Includes a dedicated vercel-build script and engine specifications
+
+### Important Note About Project Location
+
+Since this project is located in a subdirectory (`canvas_apps/canvas-notes-app`) of the repository, it's crucial to:
+
+1. Use the root `vercel.json` file to correctly specify the project location
+2. Set the correct **Root Directory** in Vercel dashboard (`./` for using the root vercel.json configuration)
 
 ## Manual Deployment Steps
 

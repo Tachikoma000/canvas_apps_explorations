@@ -40,6 +40,21 @@ export const collaborationConfig = {
   // Maximum number of connections
   maxConnections: 30,
   
+  // WebSocket connection configuration
+  websocket: {
+    // In production, we're using a demo WebSocket server
+    // For a production app, you should set up your own WebSocket server
+    // The demo server will work fine for testing but has connection limits
+    url: isProduction 
+      ? 'wss://demos.yjs.dev'
+      : 'ws://localhost:1234',
+    
+    // Set to true to use WebSocket provider instead of WebRTC
+    // This provides more reliable connectivity in environments
+    // where WebRTC might be blocked or restricted
+    preferWebsocket: isProduction
+  },
+  
   // For debugging
   enableLogging: !isProduction
 };

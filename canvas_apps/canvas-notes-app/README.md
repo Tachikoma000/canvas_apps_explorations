@@ -1,91 +1,72 @@
-# Canvas Notes App
+# Canvas Notes App with Real-Time Collaboration
 
-A React application that allows users to create and connect notes on an interactive canvas.
+A collaborative canvas application that allows multiple users to work on the same canvas in real-time. Create notes, make connections, and collaborate with others from anywhere.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app) and uses [React Flow](https://reactflow.dev/) for canvas interactions.
+## Features
 
-## Deploying to Vercel
+- **Real-time Collaboration**: All changes sync instantly across users
+- **Single Global Canvas**: Everyone connects to the same workspace automatically
+- **User Awareness**: See where other users are working with live cursor tracking
+- **Offline Support**: Changes persist locally even when offline
+- **Responsive Design**: Works on desktop and tablet devices
 
-This project is configured for easy deployment to Vercel. Follow these steps:
+## Technology Stack
 
-1. Ensure you have the Vercel CLI installed: `npm i -g vercel`
-2. Log in to Vercel: `vercel login`
-3. From the project root directory, run: `vercel`
-4. Follow the prompts to deploy your application
+- React for the UI
+- Valtio for state management
+- Yjs for real-time collaboration
+- WebRTC for peer-to-peer connections
+- IndexedDB for local persistence
+- XYFlow (React Flow) for the canvas visualization
 
-Alternatively, you can connect your GitHub repository to Vercel for automatic deployments:
+## Development
 
-1. Push your code to GitHub
-2. Visit [vercel.com](https://vercel.com) and sign in
-3. Click "New Project" and import your repository
-4. Vercel will detect React automatically and use the correct build settings
-5. Click "Deploy"
+1. Clone the repository
+2. Install dependencies:
+   ```
+   npm install
+   ```
+3. Start the development server:
+   ```
+   npm start
+   ```
 
-The deployment is configured through the `vercel.json` file in the root directory.
+## Collaboration Features
 
-## Available Scripts
+The app uses Yjs with WebRTC for peer-to-peer collaboration. All users automatically join the same room (defined in `src/config.js`).
 
-In the project directory, you can run:
+Key collaboration files:
+- `src/yjs/yjs.js` - Core Yjs setup
+- `src/store/canvasStore.js` - Synchronized state store
+- `src/yjs/useSyncToYjsEffect.js` - Hook that connects React to Yjs
+- `src/yjs/Cursors.js` - Remote cursor visualization
+- `src/yjs/persistenceProvider.js` - Local data persistence
 
-### `npm start`
+## Deployment on Vercel
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+This app is configured for deployment on Vercel:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+1. Connect your GitHub repository to Vercel
+2. Vercel will automatically detect the React app
+3. No special environment variables are required
+4. The deployment will use the configuration in vercel.json
 
-### `npm test`
+### Production Considerations
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+For better cross-network collaboration in production:
+- For enterprise use, consider setting up a dedicated signaling server
+- Update the iceServers in src/config.js with your own TURN server credentials
+- For large teams, consider implementing user authentication and multiple canvases
 
-### `npm run build`
+## Performance Optimization
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+The collaborative features have been optimized for performance:
+- Efficient data structures for quick lookups
+- Debounced updates for text editing
+- Suppressed unnecessary console warnings
+- Local persistence for better offline experience
+- STUN/TURN server integration for reliable connections
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## License
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+MIT

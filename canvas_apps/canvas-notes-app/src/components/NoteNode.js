@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Handle, Position, useReactFlow } from '@xyflow/react';
+import { updateNodeData, updateNodeStyle, deleteNode } from '../store/canvasStore';
 
 // Internal helper component for size menu buttons
 const SizeButton = ({ onClick, children, isLast = false }) => (
@@ -28,14 +29,19 @@ function NoteNode({ id, data, isConnectable, selected }) {
   const [showSizeMenu, setShowSizeMenu] = useState(false);
   const sizeButtonRef = useRef(null);
   const nodeRef = useRef(null);
-  const { deleteElements, setNodes } = useReactFlow();
+  const { deleteElements } = useReactFlow();
   
-  // Update the node data when the text changes
+  // Update local state when data changes (e.g., from other collaborators)
   useEffect(() => {
-    if (data.onChange) {
-      data.onChange(noteText);
-    }
-  }, [noteText, data]);
+    setNoteText(data.text || '');
+  }, [data.text]);
+  
+  // Update the collaborative store when text changes locally
+  const handleTextChange = useCallback((event) => {
+    const newText = event.target.value;
+    setNoteText(newText);
+    updateNodeData(id, { text: newText });
+  }, [id]);
   
   // Handle clicking outside to close the menu
   useEffect(() => {
@@ -60,28 +66,19 @@ function NoteNode({ id, data, isConnectable, selected }) {
   
   // Change node size to predefined dimensions
   const changeNodeSize = useCallback((width, height) => {
-    setNodes(nodes => 
-      nodes.map(node => {
-        if (node.id === id) {
-          return {
-            ...node,
-            style: {
-              ...node.style,
-              width,
-              height
-            }
-          };
-        }
-        return node;
-      })
-    );
+    updateNodeStyle(id, { width, height });
     setShowSizeMenu(false);
-  }, [id, setNodes]);
+  }, [id]);
   
   // Toggle the size menu visibility
   const toggleSizeMenu = useCallback(() => {
     setShowSizeMenu(!showSizeMenu);
   }, [showSizeMenu]);
+  
+  // Handle node deletion
+  const handleDeleteNode = useCallback(() => {
+    deleteNode(id);
+  }, [id]);
   
   return (
     <div className={`note-node ${selected ? 'selected' : ''}`} ref={nodeRef}>
@@ -117,7 +114,8 @@ function NoteNode({ id, data, isConnectable, selected }) {
           )}
           <button 
             className="note-node-delete" 
-            onClick={() => deleteElements({ nodes: [{ id }] })}
+            onClick={handleDeleteNode}
+            title="Delete note"
           >
             ×
           </button>
@@ -127,7 +125,7 @@ function NoteNode({ id, data, isConnectable, selected }) {
         <textarea
           className="note-textarea"
           value={noteText}
-          onChange={(e) => setNoteText(e.target.value)}
+          onChange={handleTextChange}
           placeholder="Write your notes here..."
         />
       </div>

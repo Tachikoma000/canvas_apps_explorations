@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -15,6 +15,19 @@ import '@xyflow/react/dist/style.css';
 
 import NoteNode from './NoteNode';
 import ThemeToggle from './ThemeToggle';
+import useSyncToYjsEffect from '../yjs/useSyncToYjsEffect';
+import Cursors from '../yjs/Cursors';
+import canvasStore, { 
+  addNode, 
+  updateNodePosition,
+  updateNodeData,
+  updateNodeStyle,
+  deleteNode,
+  addEdge as addEdgeToStore,
+  updateEdge as updateEdgeInStore,
+  deleteEdge as deleteEdgeFromStore
+} from '../store/canvasStore';
+import { proxy, snapshot, subscribe } from 'valtio';
 
 // Node types definition
 const nodeTypes = {
@@ -29,21 +42,32 @@ function CanvasFlow() {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
+  const [connectedUsers, setConnectedUsers] = useState(0);
+  
+  // Connect to Yjs collaborative session
+  const { connectedPeers } = useSyncToYjsEffect();
+  
+  // Subscribe to canvasStore changes and update React Flow state
+  useEffect(() => {
+    const unsubscribe = subscribe(canvasStore, () => {
+      const snap = snapshot(canvasStore);
+      
+      // Convert nodes object to array for React Flow
+      const nodesArray = Object.values(snap.nodes);
+      setNodes(nodesArray);
+      
+      // Convert edges object to array for React Flow
+      const edgesArray = Object.values(snap.edges);
+      setEdges(edgesArray);
+    });
+    
+    return () => unsubscribe();
+  }, [setNodes, setEdges]);
 
   // Handle node text changes
   const onNodeTextChange = useCallback((nodeId, text) => {
-    setNodes((nds) =>
-      nds.map((node) => {
-        if (node.id === nodeId) {
-          node.data = {
-            ...node.data,
-            text,
-          };
-        }
-        return node;
-      })
-    );
-  }, [setNodes]);
+    updateNodeData(nodeId, { text });
+  }, []);
 
   // Handle connections
   const onConnect = useCallback(
@@ -51,13 +75,16 @@ function CanvasFlow() {
       // Apply default styling for new connections
       const newEdge = {
         ...params,
+        id: `edge-${params.source}-${params.target}`,
         type: 'default',
         markerEnd: { type: MarkerType.Arrow },
         style: { stroke: 'var(--primary)', strokeWidth: 1.5 }
       };
-      return setEdges((eds) => addEdge(newEdge, eds));
+      
+      // Add to collaborative store
+      addEdgeToStore(newEdge);
     },
-    [setEdges]
+    []
   );
 
   // Create a new node at the specified position or center of the viewport
@@ -70,14 +97,15 @@ function CanvasFlow() {
           y: window.innerHeight / 2 - 75
         };
         
+        const newId = getId();
         const newNode = {
-          id: getId(),
+          id: newId,
           position: nodePosition,
           type: 'note',
           data: { 
             label: `Note ${id}`, 
             text: '',
-            onChange: (text) => onNodeTextChange(newNode.id, text)
+            onChange: (text) => onNodeTextChange(newId, text)
           },
           style: {
             width: 250,
@@ -85,10 +113,11 @@ function CanvasFlow() {
           }
         };
 
-        setNodes((nds) => nds.concat(newNode));
+        // Add to collaborative store
+        addNode(newNode);
       }
     },
-    [reactFlowInstance, setNodes, onNodeTextChange]
+    [reactFlowInstance, onNodeTextChange]
   );
 
   // Context menus
@@ -140,25 +169,23 @@ function CanvasFlow() {
   // Update edge properties
   const updateEdge = useCallback(
     (edgeId, newData) => {
-      setEdges((eds) =>
-        eds.map((edge) => {
-          if (edge.id === edgeId) {
-            return { ...edge, ...newData };
-          }
-          return edge;
-        })
-      );
+      updateEdgeInStore(edgeId, newData);
     },
-    [setEdges]
+    []
   );
 
   // Handle edge disconnection
   const disconnectEdge = useCallback(
     (edgeId) => {
-      setEdges((eds) => eds.filter((edge) => edge.id !== edgeId));
+      deleteEdgeFromStore(edgeId);
     },
-    [setEdges]
+    []
   );
+  
+  // Handle node drag
+  const onNodeDragStop = useCallback((event, node) => {
+    updateNodePosition(node.id, node.position);
+  }, []);
 
   // Hide context menus when clicking anywhere
   const onPaneClick = useCallback(() => {
@@ -178,6 +205,7 @@ function CanvasFlow() {
         onPaneClick={onPaneClick}
         onPaneContextMenu={onPaneContextMenu}
         onEdgeContextMenu={onEdgeContextMenu}
+        onNodeDragStop={onNodeDragStop}
         nodeTypes={nodeTypes}
         fitView
         snapToGrid
@@ -196,6 +224,12 @@ function CanvasFlow() {
           <h3>Canvas Notes</h3>
           <p>Right-click on the canvas to add a note</p>
           <p>Connect notes by dragging from one handle to another</p>
+          <p><strong>Collaborative Mode Enabled</strong></p>
+          <p className="collaboration-status">
+            {connectedPeers > 1 
+              ? `${connectedPeers} users connected` 
+              : 'Waiting for other users...'}
+          </p>
         </Panel>
         
         <Panel position="top-right" className="top-controls">
@@ -416,6 +450,9 @@ function CanvasFlow() {
           </div>
         )}
       </ReactFlow>
+      
+      {/* Remote user cursors */}
+      <Cursors />
     </div>
   );
 }

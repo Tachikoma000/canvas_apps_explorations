@@ -40,7 +40,9 @@ export const ymap = ydoc.getMap('canvasNotesApp.v1');
 // Set up the WebRTC provider for peer-to-peer connections with a fixed room name for all users
 export const provider = new WebrtcProvider(collaborationConfig.roomName, ydoc, {
   // Optimize for production vs development
-  signaling: [], // Direct connections only, no signaling servers
+  signaling: environment.isProduction 
+    ? ['wss://signaling.yjs.dev', 'wss://y-webrtc-signaling-eu.herokuapp.com', 'wss://y-webrtc-signaling-us.herokuapp.com'] 
+    : [],
   maxConns: collaborationConfig.maxConnections,
   filterBcConns: false, // Enable broadcast channel for local connections
   peerOpts: {

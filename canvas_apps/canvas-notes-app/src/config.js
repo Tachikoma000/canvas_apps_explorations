@@ -46,7 +46,7 @@ export const collaborationConfig = {
     // Read from environment variable if available, otherwise use default values
     url: process.env.REACT_APP_WEBSOCKET_URL || 
          (isProduction 
-           ? 'wss://canvas-notes-3926.loca.lt' // Localtunnel URL for testing
+           ? 'wss://canvas-notes-9662.loca.lt' // Localtunnel URL for testing
            : 'ws://localhost:1234'), // Default development URL
     
     // Always use WebSocket provider for more reliable connectivity

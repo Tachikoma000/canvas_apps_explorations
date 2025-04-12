@@ -42,17 +42,15 @@ export const collaborationConfig = {
   
   // WebSocket connection configuration
   websocket: {
-    // In production, we're using a demo WebSocket server
-    // For a production app, you should set up your own WebSocket server
-    // The demo server will work fine for testing but has connection limits
-    url: isProduction 
-      ? 'wss://demos.yjs.dev'
-      : 'ws://localhost:1234',
+    // Uses dedicated WebSocket server
+    // Read from environment variable if available, otherwise use default values
+    url: process.env.REACT_APP_WEBSOCKET_URL || 
+         (isProduction 
+           ? 'wss://canvas-notes-websocket.example.com' // Default production URL
+           : 'ws://localhost:1234'), // Default development URL
     
-    // Set to true to use WebSocket provider instead of WebRTC
-    // This provides more reliable connectivity in environments
-    // where WebRTC might be blocked or restricted
-    preferWebsocket: isProduction
+    // Always use WebSocket provider for more reliable connectivity
+    preferWebsocket: true
   },
   
   // For debugging
